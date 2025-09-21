@@ -4,7 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>2025国庆云南之旅 - 移动端行程规划</title>
-    <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=I5OPQwGk2VSQSj5KCoU1EwmmUeGHc2Cw"></script>
+    <script>
+        // 百度地图加载错误处理
+        function handleMapLoadError() {
+            console.error('百度地图API加载失败');
+            setTimeout(() => {
+                const mapElement = document.getElementById('map');
+                if (mapElement) {
+                    mapElement.innerHTML = '<div class="map-loading">❌ 地图服务暂不可用<br><small>请检查网络连接</small></div>';
+                }
+            }, 1000);
+        }
+    </script>
+    <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=I5OPQwGk2VSQSj5KCoU1EwmmUeGHc2Cw" onerror="handleMapLoadError()"></script>
     <style>
         * {
             margin: 0;
@@ -749,22 +761,47 @@
 
         // 初始化地图
         function initMap() {
-            // 请注意：您需要申请百度地图API密钥并替换上面的AK参数
-            map = new BMap.Map("map");
-            map.centerAndZoom(new BMap.Point(100.2324803392115, 26.883161684001312), 7);
-            map.enableScrollWheelZoom(true);
-            
-            // 添加地图控件
-            map.addControl(new BMap.NavigationControl());
-            map.addControl(new BMap.ScaleControl());
-            map.addControl(new BMap.OverviewMapControl());
-            
-            // 显示第一天的地点
-            showDay(1);
+            try {
+                // 检查百度地图API是否加载成功
+                if (typeof BMap === 'undefined') {
+                    throw new Error('百度地图API未加载');
+                }
+                
+                map = new BMap.Map("map");
+                map.centerAndZoom(new BMap.Point(100.2324803392115, 26.883161684001312), 7);
+                map.enableScrollWheelZoom(true);
+                
+                // 添加地图控件
+                map.addControl(new BMap.NavigationControl({
+                    anchor: BMAP_ANCHOR_TOP_LEFT,
+                    type: BMAP_NAVIGATION_CONTROL_SMALL
+                }));
+                map.addControl(new BMap.ScaleControl({
+                    anchor: BMAP_ANCHOR_BOTTOM_LEFT
+                }));
+                
+                // 移动端不需要鹰眼地图
+                if (!isMobile()) {
+                    map.addControl(new BMap.OverviewMapControl());
+                }
+                
+                // 地图加载完成后显示第一天的地点
+                map.addEventListener("tilesloaded", function() {
+                    console.log('地图瓦片加载完成');
+                    displayMapMarkers(1);
+                });
+                
+                console.log('地图初始化成功');
+                
+            } catch (error) {
+                console.error('地图初始化失败:', error);
+                const mapElement = document.getElementById('map');
+                mapElement.innerHTML = '<div class="map-loading">地图加载失败，请检查网络连接</div>';
+            }
         }
 
-        // 显示指定天数的地点
-        function showDay(day) {
+        // 旧版本showDay函数 - 兼容性保留
+        function showDay_old(day) {
             currentDay = day;
             
             // 更新按钮状态
@@ -779,53 +816,11 @@
             });
             document.getElementById(`day${day}`).classList.add('active');
             
-            // 清除地图上的标记
-            map.clearOverlays();
+            // 更新滑动指示器
+            updateSwipeIndicator(day);
             
-            const dayLocations = locations[day];
-            if (!dayLocations || dayLocations.length === 0) return;
-            
-            const points = [];
-            
-            // 添加标记点
-            dayLocations.forEach((location, index) => {
-                const point = new BMap.Point(location.lng, location.lat);
-                points.push(point);
-                
-                // 创建标记
-                let icon;
-                if (location.type === 'hotel') {
-                    icon = new BMap.Icon('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23e74c3c"><path d="M19 7h-3V6a4 4 0 0 0-8 0v1H5a1 1 0 0 0-1 1v11a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8a1 1 0 0 0-1-1ZM10 6a2 2 0 0 1 4 0v1h-4V6Zm8 13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V9h2v1a1 1 0 0 0 2 0V9h4v1a1 1 0 0 0 2 0V9h2v10Z"/></svg>', new BMap.Size(30, 30));
-                } else if (location.type === 'attraction') {
-                    icon = new BMap.Icon('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2327ae60"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>', new BMap.Size(30, 30));
-                } else {
-                    icon = new BMap.Icon('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%233498db"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>', new BMap.Size(30, 30));
-                }
-                
-                const marker = new BMap.Marker(point, {icon: icon});
-                map.addOverlay(marker);
-                
-                // 添加信息窗口
-                const infoWindow = new BMap.InfoWindow(location.name);
-                marker.addEventListener("click", function(){
-                    map.openInfoWindow(infoWindow, point);
-                });
-            });
-            
-            // 如果有多个点，绘制路线
-            if (points.length > 1) {
-                const polyline = new BMap.Polyline(points, {
-                    strokeColor: "#667eea",
-                    strokeWeight: 3,
-                    strokeOpacity: 0.8
-                });
-                map.addOverlay(polyline);
-            }
-            
-            // 调整视图以显示所有点
-            if (points.length > 0) {
-                map.setViewport(points);
-            }
+            // 显示地图标记
+            displayMapMarkers(day);
         }
 
         // 时间轴卡片点击事件
@@ -892,7 +887,7 @@
             });
         });
 
-        // 增强的showDay函数
+        // 显示指定天数的地点（原始版本）
         function showDay(day) {
             currentDay = day;
             
@@ -911,8 +906,20 @@
             // 更新滑动指示器
             updateSwipeIndicator(day);
             
-            // 清除地图上的标记
-            if (map) {
+            // 显示地图标记
+            displayMapMarkers(day);
+        }
+
+        // 专门处理地图标记显示的函数
+        function displayMapMarkers(day) {
+            // 检查地图是否已初始化
+            if (!map || typeof BMap === 'undefined') {
+                console.log('地图尚未初始化，跳过标记显示');
+                return;
+            }
+
+            try {
+                // 清除地图上的标记
                 map.clearOverlays();
                 
                 const dayLocations = locations[day];
@@ -926,20 +933,24 @@
                     points.push(point);
                     
                     // 创建标记
-                    let icon;
+                    let iconUrl;
                     if (location.type === 'hotel') {
-                        icon = new BMap.Icon('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23e74c3c"><path d="M19 7h-3V6a4 4 0 0 0-8 0v1H5a1 1 0 0 0-1 1v11a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8a1 1 0 0 0-1-1ZM10 6a2 2 0 0 1 4 0v1h-4V6Zm8 13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V9h2v1a1 1 0 0 0 2 0V9h4v1a1 1 0 0 0 2 0V9h2v10Z"/></svg>', new BMap.Size(25, 25));
+                        iconUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#e74c3c"><path d="M19 7h-3V6a4 4 0 0 0-8 0v1H5a1 1 0 0 0-1 1v11a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8a1 1 0 0 0-1-1ZM10 6a2 2 0 0 1 4 0v1h-4V6Zm8 13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V9h2v1a1 1 0 0 0 2 0V9h4v1a1 1 0 0 0 2 0V9h2v10Z"/></svg>');
                     } else if (location.type === 'attraction') {
-                        icon = new BMap.Icon('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2327ae60"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>', new BMap.Size(25, 25));
+                        iconUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#27ae60"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>');
                     } else {
-                        icon = new BMap.Icon('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%233498db"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>', new BMap.Size(25, 25));
+                        iconUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#3498db"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>');
                     }
                     
+                    const icon = new BMap.Icon(iconUrl, new BMap.Size(25, 25));
                     const marker = new BMap.Marker(point, {icon: icon});
                     map.addOverlay(marker);
                     
                     // 添加信息窗口
-                    const infoWindow = new BMap.InfoWindow(location.name);
+                    const infoWindow = new BMap.InfoWindow(location.name, {
+                        width: 200,
+                        height: 50
+                    });
                     marker.addEventListener("click", function(){
                         map.openInfoWindow(infoWindow, point);
                     });
@@ -949,7 +960,7 @@
                 if (points.length > 1) {
                     const polyline = new BMap.Polyline(points, {
                         strokeColor: "#667eea",
-                        strokeWeight: 2,
+                        strokeWeight: 3,
                         strokeOpacity: 0.8
                     });
                     map.addOverlay(polyline);
@@ -959,6 +970,9 @@
                 if (points.length > 0) {
                     map.setViewport(points);
                 }
+                
+            } catch (error) {
+                console.error('显示地图标记时出错:', error);
             }
         }
 
@@ -997,13 +1011,35 @@
             // 窗口大小变化时重新检测
             window.addEventListener('resize', toggleMobileNav);
             
-            // 模拟百度地图API加载
+            // 初始化百度地图
             setTimeout(() => {
                 const mapElement = document.getElementById('map');
-                mapElement.innerHTML = '<div class="map-loading">正在加载地图...请申请百度地图API密钥</div>';
-                console.log('请申请百度地图API密钥以显示真实地图');
-                // initMap(); // 取消注释以启用真实地图
-            }, 1000);
+                mapElement.innerHTML = '<div class="map-loading">正在加载地图...</div>';
+                
+                // 检查百度地图API是否已加载
+                if (typeof BMap !== 'undefined') {
+                    console.log('百度地图API已加载，开始初始化地图');
+                    initMap();
+                } else {
+                    console.log('百度地图API尚未加载，等待中...');
+                    // 如果API还没加载完成，等待一下再试
+                    let retryCount = 0;
+                    const checkMapAPI = setInterval(() => {
+                        retryCount++;
+                        console.log(`第${retryCount}次检查百度地图API...`);
+                        if (typeof BMap !== 'undefined') {
+                            clearInterval(checkMapAPI);
+                            console.log('百度地图API加载成功，开始初始化地图');
+                            initMap();
+                        } else if (retryCount > 10) {
+                            // 超过10次重试（5秒）后放弃
+                            clearInterval(checkMapAPI);
+                            console.error('百度地图API加载超时');
+                            mapElement.innerHTML = '<div class="map-loading">⚠️ 地图加载超时<br><small>请检查网络连接或刷新页面重试</small></div>';
+                        }
+                    }, 500);
+                }
+            }, 500);
             
             // 添加页面加载动画
             document.querySelectorAll('.day-card').forEach((card, index) => {
