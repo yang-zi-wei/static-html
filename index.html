@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>2025国庆云南之旅 - 移动端行程规划</title>
+    <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=f13033549cdc4867815e3eac030fb09bcd33db764f6f4abab7782310ed58f240 "></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            padding: 15px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            color: white;
+            padding: 20px 10px;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            line-height: 1.2;
+        }
+
+        .header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+
+        .timeline {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(to bottom, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+
+        .day-card {
+            position: relative;
+            margin-bottom: 25px;
+            margin-left: 45px;
+            opacity: 0.7;
+            transform: translateX(10px);
+            transition: all 0.4s ease;
+            cursor: pointer;
+        }
+
+        .day-card.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .day-card::before {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: #667eea;
+            border: 3px solid white;
+            border-radius: 50%;
+            top: 25px;
+            left: -53px;
+            z-index: 2;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .day-card.active::before {
+            background: #764ba2;
+            transform: scale(1.2);
+        }
+
+        .day-content {
+            background: white;
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            touch-action: manipulation;
+        }
+
+        .day-content:active {
+            transform: scale(0.98);
+        }
+
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .day-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 3px;
+        }
+
+        .day-date {
+            font-size: 0.95rem;
+            color: #666;
+        }
+
+        .weather-icon {
+            font-size: 1.8rem;
+            color: #f39c12;
+        }
+
+        .destinations {
+            margin-bottom: 15px;
+        }
+
+        .destination {
+            background: #f8f9fa;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border-left: 3px solid #667eea;
+        }
+
+        .destination h4 {
+            color: #667eea;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            font-size: 1rem;
+        }
+
+        .destination h4::before {
+            content: '📍';
+            margin-right: 6px;
+            font-size: 1.1rem;
+        }
+
+        .destination p {
+            color: #666;
+            line-height: 1.5;
+            font-size: 0.9rem;
+        }
+
+        .hotel {
+            background: linear-gradient(135deg, #667eea20, #764ba220);
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #667eea40;
+        }
+
+        .hotel h4 {
+            color: #764ba2;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            font-size: 1rem;
+        }
+
+        .hotel h4::before {
+            content: '🏨';
+            margin-right: 6px;
+            font-size: 1.1rem;
+        }
+
+        .hotel p {
+            color: #666;
+            line-height: 1.5;
+            font-size: 0.9rem;
+        }
+
+        .map-container {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 25px 0;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .map-container h3 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #667eea;
+            font-size: 1.2rem;
+        }
+
+        #map {
+            width: 100%;
+            height: 300px;
+            border-radius: 8px;
+            border: 1px solid #f0f0f0;
+        }
+
+        .day-selector {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+            padding: 0 5px;
+        }
+
+        .day-btn {
+            padding: 12px 8px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            font-size: 0.85rem;
+            text-align: center;
+            touch-action: manipulation;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .day-btn:active,
+        .day-btn.active {
+            background: #667eea;
+            color: white;
+            transform: scale(0.95);
+        }
+
+        .route-info {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 20px 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .route-info h3 {
+            color: #667eea;
+            margin-bottom: 12px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 3px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        /* 移动端专用样式 */
+        .mobile-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 10px 15px 20px;
+            box-shadow: 0 -2px 20px rgba(0,0,0,0.1);
+            z-index: 1000;
+            display: none;
+        }
+
+        .mobile-nav.show {
+            display: block;
+        }
+
+        .mobile-nav .nav-buttons {
+            display: flex;
+            justify-content: space-around;
+            gap: 10px;
+        }
+
+        .mobile-nav .nav-btn {
+            flex: 1;
+            padding: 12px 8px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            touch-action: manipulation;
+        }
+
+        .mobile-nav .nav-btn:active {
+            transform: scale(0.95);
+        }
+
+        .tips-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .tips-section h4 {
+            color: #667eea;
+            margin-bottom: 8px;
+            font-size: 1rem;
+        }
+
+        .tips-section ul {
+            color: #666;
+            line-height: 1.6;
+            font-size: 0.9rem;
+            padding-left: 18px;
+        }
+
+        .tips-section li {
+            margin-bottom: 5px;
+        }
+
+        /* 滑动指示器 */
+        .swipe-indicator {
+            position: fixed;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .swipe-dot {
+            width: 8px;
+            height: 8px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .swipe-dot.active {
+            background: white;
+            transform: scale(1.2);
+        }
+
+        /* 优化滚动 */
+        .container {
+            scroll-behavior: smooth;
+        }
+
+        /* 触摸反馈 */
+        .day-card:active .day-content {
+            transform: scale(0.98);
+        }
+
+        /* 加载动画 */
+        .fade-in {
+            animation: fadeIn 0.6s ease;
+        }
+
+        .slide-in {
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* 地图加载状态 */
+        .map-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 300px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .map-loading::before {
+            content: '🗺️';
+            margin-right: 8px;
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌄 2025国庆云南之旅</h1>
+            <p>大理 → 丽江 → 香格里拉 → 昆明 | 8天7夜梦幻之旅</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number">8</div>
+                <div class="stat-label">天数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">4</div>
+                <div class="stat-label">城市</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">12</div>
+                <div class="stat-label">景点</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">3</div>
+                <div class="stat-label">住宿</div>
+            </div>
+        </div>
+
+        <div class="map-container">
+            <h3>🗺️ 行程路线图</h3>
+            <div class="day-selector">
+                <button class="day-btn active" onclick="showDay(1)">第1天</button>
+                <button class="day-btn" onclick="showDay(2)">第2天</button>
+                <button class="day-btn" onclick="showDay(3)">第3天</button>
+                <button class="day-btn" onclick="showDay(4)">第4天</button>
+                <button class="day-btn" onclick="showDay(5)">第5天</button>
+                <button class="day-btn" onclick="showDay(6)">第6天</button>
+                <button class="day-btn" onclick="showDay(7)">第7天</button>
+                <button class="day-btn" onclick="showDay(8)">第8天</button>
+            </div>
+            <div id="map"></div>
+        </div>
+
+        <div class="timeline">
+            <div class="day-card active" id="day1">
+                <div class="day-content">
+                    <div class="day-header">
+                        <div>
+                            <div class="day-number">第1天</div>
+                            <div class="day-date">10月1日 (国庆节)</div>
+                        </div>
+                        <div class="weather-icon">☀️</div>
+                    </div>
+                    <div class="destinations">
+                        <div class="destination">
+                            <h4>抵达大理</h4>
+                            <p>开始美妙的云南之旅，感受大理的风花雪月。下关风，上关花，苍山雪，洱海月，四大美景等待你的到来。</p>
+                        </div>
+                    </div>
+                    <div class="hotel">
+                        <h4>大理月海风栖海景民宿</h4>
+                        <p>坐落在洱海边，推窗即可看到美丽的洱海景色，感受大理的宁静与美好。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="day-card" id="day2">
+                <div class="day-content">
+                    <div class="day-header">
+                        <div>
+                            <div class="day-number">第2天</div>
+                            <div class="day-date">10月2日</div>
+                        </div>
+                        <div class="weather-icon">🌤️</div>
+                    </div>
+                    <div class="destinations">
+                        <div class="destination">
+                            <h4>大理环洱海</h4>
+                            <p>骑行或自驾环洱海，欣赏高原明珠的绝美风光。经过双廊、挖色、海东等著名景点，每一处都是拍照圣地。</p>
+                        </div>
+                    </div>
+                    <div class="hotel">
+                        <h4>大理月海风栖海景民宿</h4>
+                        <p>继续享受洱海边的宁静时光，看日出日落，听海浪声。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="day-card" id="day3">
+                <div class="day-content">
+                    <div class="day-header">
+                        <div>
+                            <div class="day-number">第3天</div>
+                            <div class="day-date">10月3日</div>
+                        </div>
+                        <div class="weather-icon">⛅</div>
+                    </div>
+                    <div class="destinations">
+                        <div class="destination">
+                            <h4>大理古城 → 丽江古城</h4>
+                            <p>上午在大理古城闲逛，感受白族文化。下午前往丽江，车程约2.5小时，到达后入住丽江古城。</p>
+                        </div>
+                    </div>
+                    <div class="hotel">
+                        <h4>天禧 Cloud Nine . Residence</h4>
+                        <p>位于丽江古城内的精品民宿，融合纳西族传统建筑与现代舒适体验。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="day-card" id="day4">
+                <div class="day-content">
+                    <div class="day-header">
+                        <div>
+                            <div class="day-number">第4天</div>
+                            <div class="day-date">10月4日</div>
+                        </div>
+                        <div class="weather-icon">🌞</div>
+                    </div>
+                    <div class="destinations">
+                        <div class="destination">
+                            <h4>拉市海骑马体验</h4>
+                            <p>前往拉市海湿地公园，体验纳西族传统的骑马文化，漫步茶马古道，感受马帮文化的历史韵味。</p>
+                        </div>
+                    </div>
+                    <div class="hotel">
+                        <h4>天禧 Cloud Nine . Residence</h4>
+                        <p>回到古城，夜晚可以在四方街感受丽江的夜生活。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="day-card" id="day5">
+                <div class="day-content">
+                    <div class="day-header">
+                        <div>
+                            <div class="day-number">第5天</div>
+                            <div class="day-date">10月5日</div>
+                        </div>
+                        <div class="weather-icon">🏔️</div>
+                    </div>
+                    <div class="destinations">
+                        <div class="destination">
+                            <h4>玉龙雪山一日游</h4>
+                            <p>乘坐冰川公园索道登上海拔4680米的玉龙雪山，体验高原雪山的壮美。下午游览蓝月谷，欣赏如镜面般的高山湖泊。</p>
+                        </div>
+                    </div>
+                    <div class="hotel">
+                        <h4>天禧 Cloud Nine . Residence</h4>
+                        <p>回到古城休息，为明天前往香格里拉做准备。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="day-card" id="day6">
+                <div class="day-content">
+                    <div class="day-header">
+                        <div>
+                            <div class="day-number">第6天</div>
+                            <div class="day-date">10月6日</div>
+                        </div>
+                        <div class="weather-icon">🌨️</div>
+                    </div>
+                    <div class="destinations">
+                        <div class="destination">
+                            <h4>丽江 → 香格里拉</h4>
+                            <p>前往香格里拉，游览纳帕海自然保护区，观看高原湿地美景。下午前往普达措国家公园，享受原始森林的清新空气。</p>
+                        </div>
+                    </div>
+                    <div class="hotel">
+                        <h4>香格里拉青鸟藏式民宿（独克宗古城店）</h4>
+                        <p>入住藏式民宿，体验藏族文化，品尝正宗的藏式美食。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="day-card" id="day7">
+                <div class="day-content">
+                    <div class="day-header">
+                        <div>
+                            <div class="day-number">第7天</div>
+                            <div class="day-date">10月7日</div>
+                        </div>
+                        <div class="weather-icon">🌦️</div>
+                    </div>
+                    <div class="destinations">
+                        <div class="destination">
+                            <h4>香格里拉 → 昆明</h4>
+                            <p>早上在独克宗古城漫步，感受藏族古城的魅力。下午飞往昆明，抵达后可游览滇池或翠湖公园。</p>
+                        </div>
+                    </div>
+                    <div class="hotel">
+                        <h4>昆明市区酒店</h4>
+                        <p>入住昆明市区，为第二天返程做准备。可选择靠近机场或市中心的酒店。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="day-card" id="day8">
+                <div class="day-content">
+                    <div class="day-header">
+                        <div>
+                            <div class="day-number">第8天</div>
+                            <div class="day-date">10月8日</div>
+                        </div>
+                        <div class="weather-icon">✈️</div>
+                    </div>
+                    <div class="destinations">
+                        <div class="destination">
+                            <h4>昆明 → 深圳</h4>
+                            <p>结束美好的云南之旅，从昆明返回深圳。可以在机场购买一些云南特产作为纪念品。</p>
+                        </div>
+                    </div>
+                    <div class="hotel">
+                        <h4>温馨的家</h4>
+                        <p>回到深圳，带着满满的回忆和美好的照片，结束这次难忘的国庆云南之旅。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="route-info">
+            <h3>🎯 旅行小贴士</h3>
+            <div class="tips-grid">
+                <div class="tips-section">
+                    <h4>📦 必备物品</h4>
+                    <ul>
+                        <li>防晒霜和太阳镜</li>
+                        <li>保暖衣物（香格里拉较冷）</li>
+                        <li>舒适的徒步鞋</li>
+                        <li>充电宝和相机</li>
+                    </ul>
+                </div>
+                <div class="tips-section">
+                    <h4>💡 注意事项</h4>
+                    <ul>
+                        <li>高原反应预防</li>
+                        <li>提前预订门票</li>
+                        <li>注意天气变化</li>
+                        <li>尊重当地文化</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 滑动指示器 -->
+    <div class="swipe-indicator">
+        <div class="swipe-dot active" data-day="1"></div>
+        <div class="swipe-dot" data-day="2"></div>
+        <div class="swipe-dot" data-day="3"></div>
+        <div class="swipe-dot" data-day="4"></div>
+        <div class="swipe-dot" data-day="5"></div>
+        <div class="swipe-dot" data-day="6"></div>
+        <div class="swipe-dot" data-day="7"></div>
+        <div class="swipe-dot" data-day="8"></div>
+    </div>
+
+    <!-- 移动端底部导航 -->
+    <div class="mobile-nav">
+        <div class="nav-buttons">
+            <button class="nav-btn" onclick="scrollToTop()">🔝 顶部</button>
+            <button class="nav-btn" onclick="scrollToMap()">🗺️ 地图</button>
+            <button class="nav-btn" onclick="scrollToDay(currentDay)">📅 当日</button>
+            <button class="nav-btn" onclick="scrollToTips()">💡 贴士</button>
+        </div>
+    </div>
+
+    <script>
+        // 地点坐标数据
+        const locations = {
+            1: [
+                {name: '大理月海风栖海景民宿', lng: 100.2800159718673, lat: 25.625181969170466, type: 'hotel'},
+                {name: '大理市', lng: 100.30807238852897, lat: 25.68461354603664, type: 'city'}
+            ],
+            2: [
+                {name: '洱海', lng: 100.02041681855775, lat: 25.4846449030408, type: 'attraction'},
+                {name: '大理月海风栖海景民宿', lng: 100.2800159718673, lat: 25.625181969170466, type: 'hotel'}
+            ],
+            3: [
+                {name: '大理市', lng: 100.30807238852897, lat: 25.68461354603664, type: 'city'},
+                {name: '丽江古城', lng: 100.2324803392115, lat: 26.883161684001312, type: 'attraction'},
+                {name: '天禧 Cloud Nine . Residence', lng: 100.23246452903453, lat: 26.860657438064884, type: 'hotel'}
+            ],
+            4: [
+                {name: '拉市海', lng: 100.14457800101992, lat: 26.88252334864385, type: 'attraction'},
+                {name: '天禧 Cloud Nine . Residence', lng: 100.23246452903453, lat: 26.860657438064884, type: 'hotel'}
+            ],
+            5: [
+                {name: '玉龙雪山', lng: 100.21047913049895, lat: 27.140137806851122, type: 'attraction'},
+                {name: '天禧 Cloud Nine . Residence', lng: 100.23246452903453, lat: 26.860657438064884, type: 'hotel'}
+            ],
+            6: [
+                {name: '纳帕海', lng: 99.65301031425089, lat: 27.859816234955442, type: 'attraction'},
+                {name: '普达措国家公园', lng: 99.95103376709265, lat: 27.864875600777214, type: 'attraction'},
+                {name: '香格里拉青鸟藏式民宿', lng: 99.71088831790075, lat: 27.81025834502009, type: 'hotel'}
+            ],
+            7: [
+                {name: '香格里拉市', lng: 99.70744457389884, lat: 27.835760125320558, type: 'city'},
+                {name: '昆明市', lng: 102.83944512326053, lat: 24.886272111644136, type: 'city'}
+            ],
+            8: [
+                {name: '昆明市', lng: 102.83944512326053, lat: 24.886272111644136, type: 'city'}
+            ]
+        };
+
+        let map;
+        let currentDay = 1;
+
+        // 初始化地图
+        function initMap() {
+            // 请注意：您需要申请百度地图API密钥并替换上面的AK参数
+            map = new BMap.Map("map");
+            map.centerAndZoom(new BMap.Point(100.2324803392115, 26.883161684001312), 7);
+            map.enableScrollWheelZoom(true);
+            
+            // 添加地图控件
+            map.addControl(new BMap.NavigationControl());
+            map.addControl(new BMap.ScaleControl());
+            map.addControl(new BMap.OverviewMapControl());
+            
+            // 显示第一天的地点
+            showDay(1);
+        }
+
+        // 显示指定天数的地点
+        function showDay(day) {
+            currentDay = day;
+            
+            // 更新按钮状态
+            document.querySelectorAll('.day-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.day-btn:nth-child(${day})`).classList.add('active');
+            
+            // 更新时间轴卡片状态
+            document.querySelectorAll('.day-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            document.getElementById(`day${day}`).classList.add('active');
+            
+            // 清除地图上的标记
+            map.clearOverlays();
+            
+            const dayLocations = locations[day];
+            if (!dayLocations || dayLocations.length === 0) return;
+            
+            const points = [];
+            
+            // 添加标记点
+            dayLocations.forEach((location, index) => {
+                const point = new BMap.Point(location.lng, location.lat);
+                points.push(point);
+                
+                // 创建标记
+                let icon;
+                if (location.type === 'hotel') {
+                    icon = new BMap.Icon('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23e74c3c"><path d="M19 7h-3V6a4 4 0 0 0-8 0v1H5a1 1 0 0 0-1 1v11a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8a1 1 0 0 0-1-1ZM10 6a2 2 0 0 1 4 0v1h-4V6Zm8 13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V9h2v1a1 1 0 0 0 2 0V9h4v1a1 1 0 0 0 2 0V9h2v10Z"/></svg>', new BMap.Size(30, 30));
+                } else if (location.type === 'attraction') {
+                    icon = new BMap.Icon('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2327ae60"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>', new BMap.Size(30, 30));
+                } else {
+                    icon = new BMap.Icon('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%233498db"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>', new BMap.Size(30, 30));
+                }
+                
+                const marker = new BMap.Marker(point, {icon: icon});
+                map.addOverlay(marker);
+                
+                // 添加信息窗口
+                const infoWindow = new BMap.InfoWindow(location.name);
+                marker.addEventListener("click", function(){
+                    map.openInfoWindow(infoWindow, point);
+                });
+            });
+            
+            // 如果有多个点，绘制路线
+            if (points.length > 1) {
+                const polyline = new BMap.Polyline(points, {
+                    strokeColor: "#667eea",
+                    strokeWeight: 3,
+                    strokeOpacity: 0.8
+                });
+                map.addOverlay(polyline);
+            }
+            
+            // 调整视图以显示所有点
+            if (points.length > 0) {
+                map.setViewport(points);
+            }
+        }
+
+        // 时间轴卡片点击事件
+        document.querySelectorAll('.day-card').forEach((card, index) => {
+            card.addEventListener('click', () => {
+                showDay(index + 1);
+            });
+        });
+
+        // 移动端优化功能
+        function updateSwipeIndicator(day) {
+            document.querySelectorAll('.swipe-dot').forEach(dot => {
+                dot.classList.remove('active');
+            });
+            document.querySelector(`.swipe-dot[data-day="${day}"]`).classList.add('active');
+        }
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function scrollToMap() {
+            document.querySelector('.map-container').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'center'
+            });
+        }
+
+        function scrollToDay(day) {
+            document.getElementById(`day${day}`).scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'center'
+            });
+        }
+
+        function scrollToTips() {
+            document.querySelector('.route-info').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+
+        // 检测移动端
+        function isMobile() {
+            return window.innerWidth <= 768;
+        }
+
+        // 显示/隐藏移动端导航
+        function toggleMobileNav() {
+            const nav = document.querySelector('.mobile-nav');
+            if (isMobile()) {
+                nav.classList.add('show');
+            } else {
+                nav.classList.remove('show');
+            }
+        }
+
+        // 滑动指示器点击事件
+        document.querySelectorAll('.swipe-dot').forEach(dot => {
+            dot.addEventListener('click', () => {
+                const day = parseInt(dot.dataset.day);
+                showDay(day);
+                scrollToDay(day);
+            });
+        });
+
+        // 增强的showDay函数
+        function showDay(day) {
+            currentDay = day;
+            
+            // 更新按钮状态
+            document.querySelectorAll('.day-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.day-btn:nth-child(${day})`).classList.add('active');
+            
+            // 更新时间轴卡片状态
+            document.querySelectorAll('.day-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            document.getElementById(`day${day}`).classList.add('active');
+            
+            // 更新滑动指示器
+            updateSwipeIndicator(day);
+            
+            // 清除地图上的标记
+            if (map) {
+                map.clearOverlays();
+                
+                const dayLocations = locations[day];
+                if (!dayLocations || dayLocations.length === 0) return;
+                
+                const points = [];
+                
+                // 添加标记点
+                dayLocations.forEach((location, index) => {
+                    const point = new BMap.Point(location.lng, location.lat);
+                    points.push(point);
+                    
+                    // 创建标记
+                    let icon;
+                    if (location.type === 'hotel') {
+                        icon = new BMap.Icon('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23e74c3c"><path d="M19 7h-3V6a4 4 0 0 0-8 0v1H5a1 1 0 0 0-1 1v11a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8a1 1 0 0 0-1-1ZM10 6a2 2 0 0 1 4 0v1h-4V6Zm8 13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V9h2v1a1 1 0 0 0 2 0V9h4v1a1 1 0 0 0 2 0V9h2v10Z"/></svg>', new BMap.Size(25, 25));
+                    } else if (location.type === 'attraction') {
+                        icon = new BMap.Icon('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2327ae60"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>', new BMap.Size(25, 25));
+                    } else {
+                        icon = new BMap.Icon('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%233498db"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>', new BMap.Size(25, 25));
+                    }
+                    
+                    const marker = new BMap.Marker(point, {icon: icon});
+                    map.addOverlay(marker);
+                    
+                    // 添加信息窗口
+                    const infoWindow = new BMap.InfoWindow(location.name);
+                    marker.addEventListener("click", function(){
+                        map.openInfoWindow(infoWindow, point);
+                    });
+                });
+                
+                // 如果有多个点，绘制路线
+                if (points.length > 1) {
+                    const polyline = new BMap.Polyline(points, {
+                        strokeColor: "#667eea",
+                        strokeWeight: 2,
+                        strokeOpacity: 0.8
+                    });
+                    map.addOverlay(polyline);
+                }
+                
+                // 调整视图以显示所有点
+                if (points.length > 0) {
+                    map.setViewport(points);
+                }
+            }
+        }
+
+        // 触摸滑动支持
+        let startY = 0;
+        let startX = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            startY = e.touches[0].clientY;
+            startX = e.touches[0].clientX;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            const endY = e.changedTouches[0].clientY;
+            const endX = e.changedTouches[0].clientX;
+            const deltaY = startY - endY;
+            const deltaX = startX - endX;
+
+            // 左右滑动切换天数
+            if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+                if (deltaX > 0 && currentDay < 8) {
+                    // 向左滑动，下一天
+                    showDay(currentDay + 1);
+                } else if (deltaX < 0 && currentDay > 1) {
+                    // 向右滑动，上一天
+                    showDay(currentDay - 1);
+                }
+            }
+        });
+
+        // 页面加载完成后初始化
+        window.onload = function() {
+            // 检测移动端并显示导航
+            toggleMobileNav();
+            
+            // 窗口大小变化时重新检测
+            window.addEventListener('resize', toggleMobileNav);
+            
+            // 模拟百度地图API加载
+            setTimeout(() => {
+                const mapElement = document.getElementById('map');
+                mapElement.innerHTML = '<div class="map-loading">正在加载地图...请申请百度地图API密钥</div>';
+                console.log('请申请百度地图API密钥以显示真实地图');
+                // initMap(); // 取消注释以启用真实地图
+            }, 1000);
+            
+            // 添加页面加载动画
+            document.querySelectorAll('.day-card').forEach((card, index) => {
+                setTimeout(() => {
+                    card.classList.add('slide-in');
+                }, index * 150);
+            });
+
+            // 添加统计卡片动画
+            setTimeout(() => {
+                document.querySelectorAll('.stat-card').forEach((card, index) => {
+                    setTimeout(() => {
+                        card.classList.add('fade-in');
+                    }, index * 100);
+                });
+            }, 500);
+        };
+    </script>
+</body>
+</html>
