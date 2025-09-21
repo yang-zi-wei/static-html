@@ -58,55 +58,10 @@
             line-height: 1.4;
         }
 
-        .timeline {
-            position: relative;
-            margin: 20px 0;
-        }
-
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 20px;
-            top: 0;
-            bottom: 0;
-            width: 3px;
-            background: linear-gradient(to bottom, #667eea, #764ba2);
-            border-radius: 2px;
-        }
-
-        .day-card {
-            position: relative;
-            margin-bottom: 25px;
-            margin-left: 45px;
-            opacity: 0.7;
-            transform: translateX(10px);
-            transition: all 0.4s ease;
-            cursor: pointer;
-        }
-
-        .day-card.active {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
-        .day-card::before {
-            content: '';
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            background: #667eea;
-            border: 3px solid white;
-            border-radius: 50%;
-            top: 25px;
-            left: -53px;
-            z-index: 2;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-        }
-
-        .day-card.active::before {
-            background: #764ba2;
-            transform: scale(1.2);
+        /* Tab面板内容样式 - 保持原有的day-content样式 */
+        .tab-panel .day-content {
+            /* 保持原有样式，移除timeline相关的margin */
+            margin-left: 0;
         }
 
         .day-content {
@@ -229,37 +184,144 @@
             border: 1px solid #f0f0f0;
         }
 
-        .day-selector {
+        /* Tab导航样式 */
+        .tab-container {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            margin: 20px 0;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .tab-navigation {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 8px;
-            margin-bottom: 15px;
-            padding: 0 5px;
+            margin-bottom: 5px;
         }
 
-        .day-btn {
+        /* 移动端tab优化 */
+        @media (max-width: 768px) {
+            .tab-navigation {
+                gap: 6px;
+            }
+            
+            .tab-btn {
+                min-height: 55px;
+                padding: 8px 4px;
+                font-size: 0.75rem;
+            }
+            
+            .tab-day {
+                font-size: 0.8rem;
+            }
+            
+            .tab-date {
+                font-size: 0.65rem;
+            }
+            
+            .tab-container {
+                margin: 15px 0;
+                padding: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .tab-navigation {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+            
+            .tab-btn {
+                min-height: 50px;
+                padding: 10px 8px;
+            }
+        }
+
+        .tab-btn {
             padding: 12px 8px;
-            border: 2px solid #667eea;
+            border: 2px solid #f0f0f0;
             background: white;
-            color: #667eea;
-            border-radius: 20px;
+            color: #666;
+            border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
             font-weight: bold;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             text-align: center;
             touch-action: manipulation;
-            min-height: 44px;
+            min-height: 60px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            position: relative;
+            overflow: hidden;
         }
 
-        .day-btn:active,
-        .day-btn.active {
-            background: #667eea;
+        .tab-btn:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
-            transform: scale(0.95);
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .tab-btn:active {
+            transform: translateY(0);
+        }
+
+        .tab-day {
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .tab-date {
+            font-size: 0.7rem;
+            opacity: 0.8;
+            font-weight: normal;
+        }
+
+        .tab-btn.active .tab-date {
+            opacity: 1;
+        }
+
+        /* Tab内容区域样式 */
+        .tab-content-container {
+            position: relative;
+            min-height: 400px;
+        }
+
+        .tab-panel {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.4s ease;
+        }
+
+        .tab-panel.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .route-info {
@@ -397,8 +459,8 @@
             scroll-behavior: smooth;
         }
 
-        /* 触摸反馈 */
-        .day-card:active .day-content {
+        /* Tab面板触摸反馈 */
+        .tab-panel:active .day-content {
             transform: scale(0.98);
         }
 
@@ -459,42 +521,52 @@
             <p>大理 → 丽江 → 香格里拉 → 昆明 | 8天7夜梦幻之旅</p>
         </div>
 
-        <div class="stats">
-            <div class="stat-card">
-                <div class="stat-number">8</div>
-                <div class="stat-label">天数</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">4</div>
-                <div class="stat-label">城市</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">12</div>
-                <div class="stat-label">景点</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">3</div>
-                <div class="stat-label">住宿</div>
+        <!-- Tab导航区域 -->
+        <div class="tab-container">
+            <div class="tab-navigation">
+                <button class="tab-btn active" onclick="showDay(1)" data-day="1">
+                    <span class="tab-day">第1天</span>
+                    <span class="tab-date">10月1日</span>
+                </button>
+                <button class="tab-btn" onclick="showDay(2)" data-day="2">
+                    <span class="tab-day">第2天</span>
+                    <span class="tab-date">10月2日</span>
+                </button>
+                <button class="tab-btn" onclick="showDay(3)" data-day="3">
+                    <span class="tab-day">第3天</span>
+                    <span class="tab-date">10月3日</span>
+                </button>
+                <button class="tab-btn" onclick="showDay(4)" data-day="4">
+                    <span class="tab-day">第4天</span>
+                    <span class="tab-date">10月4日</span>
+                </button>
+                <button class="tab-btn" onclick="showDay(5)" data-day="5">
+                    <span class="tab-day">第5天</span>
+                    <span class="tab-date">10月5日</span>
+                </button>
+                <button class="tab-btn" onclick="showDay(6)" data-day="6">
+                    <span class="tab-day">第6天</span>
+                    <span class="tab-date">10月6日</span>
+                </button>
+                <button class="tab-btn" onclick="showDay(7)" data-day="7">
+                    <span class="tab-day">第7天</span>
+                    <span class="tab-date">10月7日</span>
+                </button>
+                <button class="tab-btn" onclick="showDay(8)" data-day="8">
+                    <span class="tab-day">第8天</span>
+                    <span class="tab-date">10月8日</span>
+                </button>
             </div>
         </div>
 
         <div class="map-container">
             <h3>🗺️ 行程路线图</h3>
-            <div class="day-selector">
-                <button class="day-btn active" onclick="showDay(1)">第1天</button>
-                <button class="day-btn" onclick="showDay(2)">第2天</button>
-                <button class="day-btn" onclick="showDay(3)">第3天</button>
-                <button class="day-btn" onclick="showDay(4)">第4天</button>
-                <button class="day-btn" onclick="showDay(5)">第5天</button>
-                <button class="day-btn" onclick="showDay(6)">第6天</button>
-                <button class="day-btn" onclick="showDay(7)">第7天</button>
-                <button class="day-btn" onclick="showDay(8)">第8天</button>
-            </div>
             <div id="map"></div>
         </div>
 
-        <div class="timeline">
-            <div class="day-card active" id="day1">
+        <!-- Tab内容区域 -->
+        <div class="tab-content-container">
+            <div class="tab-panel active" id="day1">
                 <div class="day-content">
                     <div class="day-header">
                         <div>
@@ -516,7 +588,7 @@
                 </div>
             </div>
 
-            <div class="day-card" id="day2">
+            <div class="tab-panel" id="day2">
                 <div class="day-content">
                     <div class="day-header">
                         <div>
@@ -538,7 +610,7 @@
                 </div>
             </div>
 
-            <div class="day-card" id="day3">
+            <div class="tab-panel" id="day3">
                 <div class="day-content">
                     <div class="day-header">
                         <div>
@@ -560,7 +632,7 @@
                 </div>
             </div>
 
-            <div class="day-card" id="day4">
+            <div class="tab-panel" id="day4">
                 <div class="day-content">
                     <div class="day-header">
                         <div>
@@ -582,7 +654,7 @@
                 </div>
             </div>
 
-            <div class="day-card" id="day5">
+            <div class="tab-panel" id="day5">
                 <div class="day-content">
                     <div class="day-header">
                         <div>
@@ -604,7 +676,7 @@
                 </div>
             </div>
 
-            <div class="day-card" id="day6">
+            <div class="tab-panel" id="day6">
                 <div class="day-content">
                     <div class="day-header">
                         <div>
@@ -626,7 +698,7 @@
                 </div>
             </div>
 
-            <div class="day-card" id="day7">
+            <div class="tab-panel" id="day7">
                 <div class="day-content">
                     <div class="day-header">
                         <div>
@@ -648,7 +720,7 @@
                 </div>
             </div>
 
-            <div class="day-card" id="day8">
+            <div class="tab-panel" id="day8">
                 <div class="day-content">
                     <div class="day-header">
                         <div>
@@ -758,6 +830,7 @@
 
         let map;
         let currentDay = 1;
+        let isMapInitialized = false;
 
         // 初始化地图
         function initMap() {
@@ -785,10 +858,14 @@
                     map.addControl(new BMap.OverviewMapControl());
                 }
                 
-                // 地图加载完成后显示第一天的地点
+                // 地图加载完成后显示当前选中天的地点（仅在首次初始化时）
                 map.addEventListener("tilesloaded", function() {
                     console.log('地图瓦片加载完成');
-                    displayMapMarkers(1);
+                    if (!isMapInitialized) {
+                        console.log('首次地图初始化，显示第1天标记');
+                        displayMapMarkers(1);
+                        isMapInitialized = true;
+                    }
                 });
                 
                 console.log('地图初始化成功');
@@ -823,10 +900,14 @@
             displayMapMarkers(day);
         }
 
-        // 时间轴卡片点击事件
-        document.querySelectorAll('.day-card').forEach((card, index) => {
-            card.addEventListener('click', () => {
-                showDay(index + 1);
+        // Tab面板内容点击事件（可选，用于移动端体验）
+        document.querySelectorAll('.tab-panel').forEach((panel, index) => {
+            panel.addEventListener('click', () => {
+                // 移动端可以添加一些交互效果
+                panel.style.transform = 'scale(0.98)';
+                setTimeout(() => {
+                    panel.style.transform = 'scale(1)';
+                }, 150);
             });
         });
 
@@ -850,9 +931,11 @@
         }
 
         function scrollToDay(day) {
-            document.getElementById(`day${day}`).scrollIntoView({ 
+            // 切换到指定的tab并滚动到tab内容区域
+            showDay(day);
+            document.querySelector('.tab-content-container').scrollIntoView({ 
                 behavior: 'smooth',
-                block: 'center'
+                block: 'start'
             });
         }
 
@@ -887,21 +970,25 @@
             });
         });
 
-        // 显示指定天数的地点（原始版本）
+        // Tab切换功能
         function showDay(day) {
             currentDay = day;
             
-            // 更新按钮状态
-            document.querySelectorAll('.day-btn').forEach(btn => {
+            // 更新tab按钮状态
+            document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            document.querySelector(`.day-btn:nth-child(${day})`).classList.add('active');
+            document.querySelector(`.tab-btn[data-day="${day}"]`).classList.add('active');
             
-            // 更新时间轴卡片状态
-            document.querySelectorAll('.day-card').forEach(card => {
-                card.classList.remove('active');
+            // 更新tab面板显示状态
+            document.querySelectorAll('.tab-panel').forEach(panel => {
+                panel.classList.remove('active');
             });
-            document.getElementById(`day${day}`).classList.add('active');
+            
+            // 显示当前选中的tab面板，添加动画效果
+            setTimeout(() => {
+                document.getElementById(`day${day}`).classList.add('active');
+            }, 100);
             
             // 更新滑动指示器
             updateSwipeIndicator(day);
@@ -966,9 +1053,15 @@
                     map.addOverlay(polyline);
                 }
                 
-                // 调整视图以显示所有点
+                // 调整视图以显示所有点，避免过度缩放
                 if (points.length > 0) {
-                    map.setViewport(points);
+                    // 如果只有一个点，使用合适的缩放级别
+                    if (points.length === 1) {
+                        map.centerAndZoom(points[0], 11);
+                    } else {
+                        // 多个点时调整视图
+                        map.setViewport(points, { margins: [50, 50, 50, 50] });
+                    }
                 }
                 
             } catch (error) {
@@ -1042,9 +1135,9 @@
             }, 500);
             
             // 添加页面加载动画
-            document.querySelectorAll('.day-card').forEach((card, index) => {
+            document.querySelectorAll('.tab-panel').forEach((panel, index) => {
                 setTimeout(() => {
-                    card.classList.add('slide-in');
+                    panel.classList.add('slide-in');
                 }, index * 150);
             });
 
